@@ -1,0 +1,105 @@
+.TH PG 1 "April 2026" "pg" "User Commands"
+
+.SH NAME
+pg \- universal package manager wrapper
+
+.SH SYNOPSIS
+.B pg
+[\fIOPTION\fR] [\fIPACKAGE\fR]
+
+.SH DESCRIPTION
+.B pg
+is a simple wrapper that provides a unified interface for multiple Linux
+package managers. It automatically detects your system and uses the
+appropriate backend (apt, nala, pacman, dnf, zypper, emerge, or xbps).
+
+.SH COMMANDS
+
+.TP
+.BR -S ", " --get
+Install a package
+
+.TP
+.BR -Rm ", " --remove
+Remove a package
+
+.TP
+.BR -Cl ", " --purge
+Remove a package and its configuration files
+
+.TP
+.BR -I ", " --index
+Search for packages
+
+.TP
+.BR -Up ", " --update
+Update package lists
+
+.TP
+.BR -Ut ", " --upgrade
+Upgrade installed packages
+
+.TP
+.BR -Rec ", " --reconfigure
+Re-run package manager detection and reset configuration
+
+.TP
+.BR -H ", " --help
+Show help menu
+
+.SH EXAMPLES
+
+.TP
+pg -I firefox
+Search for a package
+
+.TP
+pg -S firefox
+Install a package
+
+.TP
+pg -Rm firefox
+Remove a package
+
+.TP
+pg -Cl firefox
+Purge a package
+
+.TP
+pg -Up
+Update repositories
+
+.TP
+pg -Ut
+Upgrade system
+
+.SH CONFIGURATION
+Configuration is stored in:
+.PP
+~/.config/pg/config.pg
+
+.SH SUPPORTED SYSTEMS
+.TP
+Debian/Ubuntu: apt or nala
+.TP
+Arch Linux: pacman or paru
+.TP
+Fedora: dnf
+.TP
+openSUSE: zypper
+.TP
+Gentoo: emerge
+.TP
+Void Linux: xbps
+
+.SH NOTES
+.B pg
+is a wrapper and does not replace your system package manager.
+
+Some helpers (like paru) must be installed manually.
+
+.SH AUTHOR
+barryC12
+
+.SH LICENSE
+MIT

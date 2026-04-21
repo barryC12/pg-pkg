@@ -1,0 +1,216 @@
+#!/usr/bin/env bash
+
+CONFIG_DIR="$HOME/.config/pg"
+CONFIG_FILE="$CONFIG_DIR/config.pg"
+
+# Colors
+BOLD="\033[1m"
+GREEN="\033[1;32m"
+BLUE="\033[1;34m"
+YELLOW="\033[1;33m"
+RESET="\033[0m"
+
+PM=""
+INSTALL=""
+REMOVE=""
+PURGE=""
+SEARCH=""
+UPDATE=""
+UPGRADE=""
+
+setup_pm() {
+    mkdir -p "$CONFIG_DIR"
+
+    # VOID LINUX (highest priority before generic detection)
+    if command -v xbps-install >/dev/null 2>&1; then
+        echo -e "${BLUE}Detected Void Linux (xbps)${RESET}"
+
+        echo -e "${YELLOW}Install xtools? [Y/n]${RESET}"
+        read -r ans
+        if [[ "$ans" =~ ^[Yy]$ || -z "$ans" ]]; then
+            sudo xbps-install -S xtools
+        fi
+
+        echo "PM=void" > "$CONFIG_FILE"
+        return
+    fi
+
+    if command -v apt >/dev/null 2>&1; then
+        echo -e "${BLUE}Detected apt-based system${RESET}"
+        echo -e "${YELLOW}Install nala? [Y/n]${RESET}"
+        read -r ans
+        if [[ "$ans" =~ ^[Yy]$ || -z "$ans" ]]; then
+            sudo apt install nala
+            echo "PM=nala" > "$CONFIG_FILE"
+        else
+            echo "PM=apt" > "$CONFIG_FILE"
+        fi
+
+    elif command -v pacman >/dev/null 2>&1; then
+        echo -e "${BLUE}Detected pacman-based system${RESET}"
+        echo -e "${YELLOW}Use paru (AUR helper)? [y/N]${RESET}"
+        read -r ans
+        if [[ "$ans" =~ ^[Yy]$ ]]; then
+            echo "Install paru manually, then rerun pg."
+            exit 1
+        else
+            echo "PM=pacman" > "$CONFIG_FILE"
+        fi
+
+    elif command -v dnf >/dev/null 2>&1; then
+        echo "PM=dnf" > "$CONFIG_FILE"
+
+    elif command -v zypper >/dev/null 2>&1; then
+        echo "PM=zypper" > "$CONFIG_FILE"
+
+    elif command -v emerge >/dev/null 2>&1; then
+        echo "PM=emerge" > "$CONFIG_FILE"
+
+    else
+        echo "No supported package manager found."
+        exit 1
+    fi
+}
+
+load_pm() {
+    if [ ! -f "$CONFIG_FILE" ]; then
+        setup_pm
+    fi
+
+    source "$CONFIG_FILE"
+
+    case "$PM" in
+        nala)
+            INSTALL="sudo nala install"
+            REMOVE="sudo nala remove"
+            PURGE="sudo nala purge"
+            SEARCH="nala search"
+            UPDATE="sudo nala update"
+            UPGRADE="sudo nala upgrade"
+            ;;
+
+        apt)
+            INSTALL="sudo apt install"
+            REMOVE="sudo apt remove"
+            PURGE="sudo apt purge"
+            SEARCH="apt search"
+            UPDATE="sudo apt update"
+            UPGRADE="sudo apt upgrade"
+            ;;
+
+        pacman)
+            INSTALL="sudo pacman -S"
+            REMOVE="sudo pacman -R"
+            PURGE="sudo pacman -Rns"
+            SEARCH="pacman -Ss"
+            UPDATE="sudo pacman -Sy"
+            UPGRADE="sudo pacman -Syu"
+            ;;
+
+        dnf)
+            INSTALL="sudo dnf install"
+            REMOVE="sudo dnf remove"
+            PURGE="sudo dnf remove"
+            SEARCH="dnf search"
+            UPDATE="sudo dnf check-update"
+            UPGRADE="sudo dnf upgrade"
+            ;;
+
+        zypper)
+            INSTALL="sudo zypper install"
+            REMOVE="sudo zypper remove"
+            PURGE="sudo zypper remove"
+            SEARCH="zypper search"
+            UPDATE="sudo zypper refresh"
+            UPGRADE="sudo zypper update"
+            ;;
+
+        emerge)
+            INSTALL="sudo emerge"
+            REMOVE="sudo emerge -C"
+            PURGE="sudo emerge -C"
+            SEARCH="emerge -s"
+            UPDATE="sudo emerge --sync"
+            UPGRADE="sudo emerge -avuDN @world"
+            ;;
+
+        void)
+            INSTALL="sudo xbps-install -S"
+            REMOVE="sudo xbps-remove"
+            PURGE="sudo xbps-remove -R"
+            SEARCH="xbps-query -Rs"
+            UPDATE="sudo xbps-install -S"
+            UPGRADE="sudo xbps-install -Su"
+            ;;
+    esac
+}
+
+show_help() {
+    echo -e "${BOLD}pg${RESET} — universal package wrapper"
+    echo
+    echo -e "${BOLD}COMMANDS${RESET}"
+    echo -e "  ${GREEN}-S,  --get${RESET}        Install package"
+    echo -e "  ${GREEN}-Rm, --remove${RESET}     Remove package"
+    echo -e "  ${GREEN}-Cl, --purge${RESET}      Purge package"
+    echo -e "  ${GREEN}-I,  --index${RESET}      Search packages"
+    echo -e "  ${GREEN}-Up, --update${RESET}     Update package lists"
+    echo -e "  ${GREEN}-Ut, --upgrade${RESET}    Upgrade system"
+    echo -e "  ${GREEN}-Rec,--reconfigure${RESET} Reconfigure package manager"
+    echo -e "  ${GREEN}-H,  --help${RESET}       Show this help menu"
+    echo
+}
+
+# Reconfigure
+if [[ "$1" == "-Rec" || "$1" == "--reconfigure" ]]; then
+    rm -f "$CONFIG_FILE"
+    setup_pm
+    echo "Reconfigured."
+    exit 0
+fi
+
+load_pm
+
+if [ -z "$1" ]; then
+    show_help
+    exit 0
+fi
+
+case "$1" in
+    -H|--help)
+        show_help
+        ;;
+
+    -S|--get)
+        shift
+        $INSTALL "$@"
+        ;;
+
+    -Rm|--remove)
+        shift
+        $REMOVE "$@"
+        ;;
+
+    -Cl|--purge)
+        shift
+        $PURGE "$@"
+        ;;
+
+    -I|--index)
+        shift
+        $SEARCH "$@"
+        ;;
+
+    -Up|--update)
+        $UPDATE
+        ;;
+
+    -Ut|--upgrade)
+        $UPGRADE
+        ;;
+
+    *)
+        echo -e "${YELLOW}Unknown option:${RESET} $1"
+        show_help
+        exit 1
+        ;;
+esac

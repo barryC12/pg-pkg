@@ -1,0 +1,58 @@
+#!/usr/bin/env sh
+
+set -e
+
+echo "==> Installing pg..."
+
+# Detect package manager and install dependencies
+if command -v apt >/dev/null 2>&1; then
+    echo "Using apt..."
+    sudo apt update
+    sudo apt install -y make git
+
+elif command -v pacman >/dev/null 2>&1; then
+    echo "Using pacman..."
+    sudo pacman -Sy --needed make git
+
+elif command -v dnf >/dev/null 2>&1; then
+    echo "Using dnf..."
+    sudo dnf install -y make git
+
+elif command -v zypper >/dev/null 2>&1; then
+    echo "Using zypper..."
+    sudo zypper install -y make git
+
+elif command -v xbps-install >/dev/null 2>&1; then
+    echo "Using Void (xbps)..."
+    sudo xbps-install -Sy make git
+
+elif command -v emerge >/dev/null 2>&1; then
+    echo "Using Gentoo..."
+    sudo emerge --sync
+    sudo emerge dev-vcs/git sys-devel/make
+
+else
+    echo "Unsupported package manager."
+    exit 1
+fi
+
+
+echo "==> Cloning pg..."
+TMP_DIR="$(mktemp -d)"
+cd "$TMP_DIR"
+
+git clone https://github.com/barryC12/pg.git
+cd pg
+
+
+echo "==> Installing..."
+sudo make install
+
+
+echo "==> Cleaning up..."
+cd /
+rm -rf "$TMP_DIR"
+
+echo
+echo "✔ Finished install"
+echo "Run 'pg' to configure your package manager"
