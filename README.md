@@ -1,6 +1,6 @@
 # pg-pkg
 
-A unified package manager wrapper for Linux — one command to rule them all.
+A unified package manager wrapper for Linux
 
 `pg` lets you install, update, remove, and manage packages using the same commands regardless of which distro or package manager you're on. Whether you're on Debian, Arch, Fedora, openSUSE, Void, or Gentoo, `pg` speaks your distro's language automatically.
 
