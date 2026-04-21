@@ -1,4 +1,4 @@
-# pg
+# pg-pkg
 
 A unified package manager wrapper for Linux — one command to rule them all.
 
@@ -26,7 +26,7 @@ A unified package manager wrapper for Linux — one command to rule them all.
 Make sure `curl` is installed, then run:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/barryC12/pg/refs/heads/master/quick-install/inst.pg | sh
+curl -fsSL https://raw.githubusercontent.com/barryC12/pg-pkg/refs/heads/master/quick-install/inst.pg | sh
 ```
 
 That's it. The script will detect your package manager, install dependencies, clone the repo, and install `pg` automatically.
@@ -63,7 +63,7 @@ sudo emerge sys-devel/make dev-vcs/git
 
 ```sh
 cd ~
-git clone https://github.com/barryC12/pg.git
+git clone https://github.com/barryC12/pg-pkg.git
 ```
 
 **3. Build and install**
