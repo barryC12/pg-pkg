@@ -82,12 +82,15 @@ Done! `pg` is now available system-wide.
 After installing, run `pg` to configure your package manager, then use the commands below:
 
 ```sh
-pg install <package>      # Install a package
-pg remove <package>       # Remove a package
-pg update                 # Update package lists
-pg upgrade                # Upgrade all installed packages
-pg search <package>       # Search for a package
-pg info <package>         # Show information about a package
+pg -S / --get <package>          # Install a package
+pg -Rm / --remove <package>      # Remove a package
+pg -Cl / --purge <package>       # purge a package 
+pg -Up / --update                # Update package lists
+pg -Ut / --upgrade               # Upgrade all installed packages
+pg -I / --index                  # Search for a package
+pg -Rec / --reconfigure          # Reconfigure The Package Manager
+pg -H / pg --help                # Show short Info about pg
+man pg                           # Display In Depth info about pg
 ```
 
 > **Tip:** Run `pg` with no arguments to see all available commands and options.
